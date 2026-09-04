@@ -15,55 +15,99 @@
         ExtendClientAreaTitleBarHeightHint="40"
         SizeChanged="MainWindow_OnSizeChanged">
   <DockPanel>
+    <!-- GNOME CSD header on Linux. Windows/macOS keep tabs-in-titlebar in this row. -->
     <Border x:Name="TitleBar"
             DockPanel.Dock="Top"
-            Height="40"
-            Background="#202020"
+            Height="47"
+            Background="#2E2E32"
+            BorderThickness="0"
             chrome:WindowDecorationProperties.ElementRole="TitleBar"
             PointerPressed="TitleBar_OnPointerPressed">
-      <Grid x:Name="TitleBarLayout"
-            ColumnDefinitions="Auto,Auto,*"
-            Margin="8,0,8,0">
-        <ScrollViewer x:Name="TabScrollViewer"
-                     Grid.Column="0"
-                     chrome:WindowDecorationProperties.ElementRole="User"
-                     MaxWidth="720"
-                     HorizontalScrollBarVisibility="Hidden"
-                     VerticalScrollBarVisibility="Disabled">
-          <StackPanel x:Name="TabStrip"
-                     Orientation="Horizontal"
-                     Spacing="0" />
-        </ScrollViewer>
+      <Panel>
+        <!-- Adwaita top rim highlight: RGB(255 255 255 / 7%). -->
+        <Border x:Name="TitleBarTopRim"
+                Height="1"
+                VerticalAlignment="Top"
+                Background="#12FFFFFF"
+                IsHitTestVisible="False"
+                ZIndex="2" />
+        <Grid x:Name="TitleBarLayout"
+              ColumnDefinitions="Auto,Auto,*,Auto,Auto"
+              Margin="10,0,8,0"
+              ZIndex="1">
+        <!-- Col0: tabs when they live in the titlebar (Windows / macOS). -->
+        <Panel x:Name="TitleBarTabsHost"
+               Grid.Column="0"
+               VerticalAlignment="Stretch">
+          <ScrollViewer x:Name="TabScrollViewer"
+                       chrome:WindowDecorationProperties.ElementRole="User"
+                       MaxWidth="720"
+                       HorizontalScrollBarVisibility="Hidden"
+                       VerticalScrollBarVisibility="Disabled">
+            <StackPanel x:Name="TabStrip"
+                       Orientation="Horizontal"
+                       Spacing="0" />
+          </ScrollViewer>
+        </Panel>
+        <!-- Col1: new-tab cluster. Linux: Adwaita-style + | shell dropdown. Menu is end hamburger. -->
         <StackPanel x:Name="NewTabCluster"
                     Grid.Column="1"
                     Orientation="Horizontal"
                     VerticalAlignment="Center"
+                    Spacing="0"
                     chrome:WindowDecorationProperties.ElementRole="User">
-          <Button x:Name="NewTabButton"
-                 Classes="icon"
-                 Width="32"
-                 Height="32"
-                 Margin="4,0"
-                 Padding="0"
-                 HorizontalContentAlignment="Center"
-                 VerticalContentAlignment="Center"
-                 VerticalAlignment="Center"
-                 chrome:WindowDecorationProperties.ElementRole="User"
-                 Click="NewTab_OnClick"
-                 AutomationProperties.Name="New tab"
-                 ToolTip.Tip="New tab (Ctrl+Shift+T)">
-            <Path Data="M 0,5 L 10,5 M 5,0 L 5,10"
-                  Width="10"
-                  Height="10"
-                  Stretch="Uniform"
-                  Stroke="#F2F2F2"
-                  StrokeThickness="1" />
-          </Button>
+          <!-- Flat Adwaita linked pair: + and shell chevron, fill only on hover. -->
+          <Border x:Name="NewTabSplit"
+                  Classes="header-split"
+                  VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Spacing="0">
+              <Button x:Name="NewTabButton"
+                     Classes="header-split-main"
+                     Width="36"
+                     Height="36"
+                     Padding="0"
+                     HorizontalContentAlignment="Center"
+                     VerticalContentAlignment="Center"
+                     VerticalAlignment="Center"
+                     chrome:WindowDecorationProperties.ElementRole="User"
+                     Click="NewTab_OnClick"
+                     AutomationProperties.Name="New tab"
+                     ToolTip.Tip="New tab (Ctrl+Shift+T)">
+                <Path Data="M 0,5.5 L 11,5.5 M 5.5,0 L 5.5,11"
+                      Width="11"
+                      Height="11"
+                      Stretch="Uniform"
+                      Stroke="#FFFFFF"
+                      StrokeThickness="1.6"
+                      StrokeLineCap="Round" />
+              </Button>
+              <Button x:Name="NewTabMenuButton"
+                     Classes="header-split-menu"
+                     Width="28"
+                     Height="36"
+                     Padding="0"
+                     HorizontalContentAlignment="Center"
+                     VerticalContentAlignment="Center"
+                     VerticalAlignment="Center"
+                     chrome:WindowDecorationProperties.ElementRole="User"
+                     Click="NewTabMenu_OnClick"
+                     AutomationProperties.Name="New tab profiles"
+                     ToolTip.Tip="New tab profiles">
+                <Path Data="M 0,1.5 L 5.5,7 L 11,1.5"
+                      Width="11"
+                      Height="7"
+                      Stretch="Uniform"
+                      Stroke="#FFFFFF"
+                      StrokeThickness="1.6"
+                      StrokeLineCap="Round" />
+              </Button>
+            </StackPanel>
+          </Border>
           <Button x:Name="MenuButton"
                  Classes="icon"
-                 Width="32"
-                 Height="32"
-                 Margin="0,0,4,0"
+                 Width="34"
+                 Height="34"
+                 Margin="6,0,0,0"
                  Padding="0"
                  HorizontalContentAlignment="Center"
                  VerticalContentAlignment="Center"
@@ -72,12 +116,13 @@
                  Click="Menu_OnClick"
                  AutomationProperties.Name="New tab menu"
                  ToolTip.Tip="New tab menu">
-            <Path Data="M 0,1 L 4,5 L 8,1"
+            <Path x:Name="MenuButtonGlyph"
+                  Data="M 0,1 L 4,5 L 8,1"
                   Width="8"
                   Height="5"
                   Stretch="Uniform"
                   Stroke="#F2F2F2"
-                  StrokeThickness="1" />
+                  StrokeThickness="1.4" />
           </Button>
           <Button x:Name="ExitFullscreenButton"
                   Classes="icon"
@@ -96,6 +141,121 @@
                   StrokeThickness="1" />
           </Button>
         </StackPanel>
+        <!-- Col2: centered app title on Linux GNOME header. -->
+        <TextBlock x:Name="WindowTitleText"
+                   Grid.Column="2"
+                   Text="Terminal"
+                   FontSize="13"
+                   FontWeight="Bold"
+                   Opacity="0.9"
+                   Foreground="#FFFFFF"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   IsHitTestVisible="False"
+                   IsVisible="False" />
+        <!-- Col3: end actions (find + menu on Linux). Flat until hover. -->
+        <StackPanel x:Name="HeaderEndActions"
+                    Grid.Column="3"
+                    Orientation="Horizontal"
+                    Spacing="0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    chrome:WindowDecorationProperties.ElementRole="User">
+          <Button x:Name="HeaderFindButton"
+                  Classes="header-action"
+                  Width="36"
+                  Height="36"
+                  IsVisible="False"
+                  Click="HeaderFind_OnClick"
+                  AutomationProperties.Name="Find"
+                  ToolTip.Tip="Find (Ctrl+Shift+F)">
+            <Path Data="M 4.5,4.5 A 3.8,3.8 0 1 1 4.5,4.51 M 7.4,7.4 L 11.5,11.5"
+                  Width="13"
+                  Height="13"
+                  Stretch="Uniform"
+                  Stroke="#FFFFFF"
+                  StrokeThickness="1.5"
+                  StrokeLineCap="Round" />
+          </Button>
+        </StackPanel>
+        <!-- Col4: client captions on Linux CSD. Close only by policy. -->
+        <StackPanel x:Name="CaptionButtons"
+                    Grid.Column="4"
+                    Orientation="Horizontal"
+                    Spacing="0"
+                    Margin="2,0,2,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    IsVisible="False"
+                    chrome:WindowDecorationProperties.ElementRole="User">
+          <Button x:Name="MinimizeButton"
+                  Classes="caption"
+                  Width="36"
+                  Height="36"
+                  Click="Minimize_OnClick"
+                  AutomationProperties.Name="Minimize"
+                  ToolTip.Tip="Minimize">
+            <Path Data="M 0,0 L 10,0"
+                  Width="10"
+                  Height="1"
+                  Stretch="Fill"
+                  VerticalAlignment="Center"
+                  Stroke="#FFFFFF"
+                  StrokeThickness="1.5"
+                  StrokeLineCap="Round" />
+          </Button>
+          <Button x:Name="MaximizeRestoreButton"
+                  Classes="caption"
+                  Width="36"
+                  Height="36"
+                  Click="MaximizeRestore_OnClick"
+                  AutomationProperties.Name="Maximize"
+                  ToolTip.Tip="Maximize">
+            <Path x:Name="MaximizeRestoreGlyph"
+                  Data="M 0,0 L 10,0 L 10,10 L 0,10 Z"
+                  Width="10"
+                  Height="10"
+                  Stretch="Uniform"
+                  Stroke="#FFFFFF"
+                  StrokeThickness="1.4" />
+          </Button>
+          <Button x:Name="CloseButton"
+                  Classes="caption close"
+                  Width="36"
+                  Height="36"
+                  Click="Close_OnClick"
+                  AutomationProperties.Name="Close"
+                  ToolTip.Tip="Close">
+            <Path Data="M 0,0 L 10,10 M 10,0 L 0,10"
+                  Width="10"
+                  Height="10"
+                  Stretch="Uniform"
+                  Stroke="#FFFFFF"
+                  StrokeThickness="1.5"
+                  StrokeLineCap="Round" />
+          </Button>
+        </StackPanel>
+        </Grid>
+      </Panel>
+    </Border>
+    <!-- Second row: tabs under the GNOME header (Linux). Same surface as header. -->
+    <Border x:Name="TabRow"
+            DockPanel.Dock="Top"
+            Height="38"
+            Background="#2E2E32"
+            IsVisible="False"
+            BorderThickness="0"
+            ClipToBounds="False">
+      <Grid x:Name="TabRowLayout"
+            ColumnDefinitions="*,Auto"
+            Margin="10,0,8,0">
+        <Panel x:Name="TabRowTabsHost"
+               Grid.Column="0"
+               VerticalAlignment="Stretch" />
+        <StackPanel x:Name="TabRowEndCluster"
+                    Grid.Column="1"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Center" />
       </Grid>
     </Border>
     <Grid>

@@ -20,12 +20,14 @@ public sealed class SettingsRow : UserControl
         _header = new TextBlock
         {
             FontSize = 14,
+            FontWeight = FontWeight.Normal,
             VerticalAlignment = VerticalAlignment.Center,
         };
         _description = new TextBlock
         {
             FontSize = 12,
-            Opacity = 0.7,
+            FontWeight = FontWeight.Normal,
+            Opacity = 0.65,
             TextWrapping = TextWrapping.Wrap,
             VerticalAlignment = VerticalAlignment.Center,
         };
@@ -47,15 +49,15 @@ public sealed class SettingsRow : UserControl
         var layout = new Grid
         {
             ColumnDefinitions = new ColumnDefinitions("*,Auto"),
-            MinHeight = 44,
-            Margin = new Thickness(16, 6),
+            MinHeight = 50,
+            Margin = new Thickness(16, 9),
         };
         layout.Children.Add(labels);
         Grid.SetColumn(_value, 1);
         layout.Children.Add(_value);
         var border = new Border
         {
-            CornerRadius = new CornerRadius(4),
+            CornerRadius = new CornerRadius(10),
             BorderThickness = new Thickness(1),
             Child = layout,
         };

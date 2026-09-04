@@ -25,6 +25,7 @@ public sealed class LinuxDesktopMetadataTests
             application["Exec"]);
         Assert.Equal("x-scheme-handler/dterm;", application["MimeType"]);
         Assert.Equal($"{AppId}", application["Icon"]);
+        Assert.Equal(AppId, application["StartupWMClass"]);
         Assert.Equal("NewWindow;NewTab;", application["Actions"]);
         Assert.DoesNotContain('`', application["Exec"]);
         Assert.DoesNotContain('$', application["Exec"]);

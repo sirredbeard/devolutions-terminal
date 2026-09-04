@@ -2,11 +2,18 @@ using Avalonia;
 using Devolutions.Terminal.Broker;
 using Devolutions.Terminal.Cli;
 using Devolutions.Terminal.Package;
+using Devolutions.Terminal.Shell;
 
 namespace Devolutions.Terminal;
 
 internal static class Program
 {
+#if ENABLE_GTK_SHELL
+    private const bool IsGtkShellBuilt = true;
+#else
+    private const bool IsGtkShellBuilt = false;
+#endif
+
     [STAThread]
     public static int Main(string[] args)
     {
@@ -47,11 +54,56 @@ internal static class Program
             args = protocolArgs;
         }
 
+        // Shell frontend must be chosen before Avalonia (or GTK) init.
+        // Phase 0: GTK only when forced (--shell=gtk / DT_SHELL=gtk). Auto desktop
+        // mapping stays Avalonia until the GTK surface hosts a real terminal.
+        ShellSelection shellSelection;
+        try
+        {
+            shellSelection = ShellSelector.Resolve(
+                args,
+                gtkShellEnabled: IsGtkShellBuilt,
+                qtShellEnabled: false);
+        }
+        catch (ArgumentException ex)
+        {
+            Console.Error.WriteLine($"dt: {ex.Message}");
+            return 2;
+        }
+
+        args = ShellSelector.StripShellArgs(args);
+
         if (args is ["--diagnose-desktop"])
         {
             Console.Out.WriteLine(new Devolutions.Terminal.App.Platform.PlatformLauncher()
                 .GetCapabilityReport());
+            Console.Out.WriteLine($"shell: {shellSelection.Kind} ({shellSelection.Reason})");
+            Console.Out.WriteLine($"shell-gtk-built: {IsGtkShellBuilt}");
+            Console.Out.WriteLine($"shell-qt-enabled: false");
             return 0;
+        }
+
+        // Phase 0: only an explicit force enters the GTK frontend. Auto desktop
+        // mapping may report Gtk for diagnostics, but Avalonia still owns the
+        // daily-driver window until the terminal surface is hosted.
+        if (shellSelection.Kind == ShellKind.Gtk && shellSelection.Forced)
+        {
+#if ENABLE_GTK_SHELL
+            Console.Error.WriteLine($"dt: {shellSelection.Reason}");
+            return Devolutions.Terminal.Shell.Gtk.GtkShellApplication.Run(args);
+#else
+            Console.Error.WriteLine(
+                "dt: GTK shell was requested, but this binary was built without ENABLE_GTK_SHELL. " +
+                "Run project Devolutions.Terminal.Shell.Gtk, or rebuild the host on Linux.");
+            return 2;
+#endif
+        }
+
+        if (shellSelection.Kind == ShellKind.Qt && shellSelection.Forced)
+        {
+            Console.Error.WriteLine($"dt: {shellSelection.Reason}");
+            Console.Error.WriteLine("dt: Qt/Plasma shell is deferred. Use --shell=avalonia or --shell=gtk.");
+            return 2;
         }
 
         var parsed = directActivation is null
@@ -141,7 +193,27 @@ internal static class Program
     public static AppBuilder BuildAvaloniaApp()
     {
         var builder = AppBuilder.Configure<TerminalApp>()
-            .UsePlatformDetect();
+            .UsePlatformDetect()
+            .With(new X11PlatformOptions
+            {
+                RenderingMode =
+                [
+                    X11RenderingMode.Vulkan,
+                    X11RenderingMode.Egl,
+                    X11RenderingMode.Glx,
+                    X11RenderingMode.Software,
+                ],
+                OverlayPopups = true,
+                UseGLibMainLoop = true,
+                UseDBusFilePicker = true,
+                EnableIme = true,
+                EnableSessionManagement = true,
+                WmClass = "com.devolutions.Terminal",
+            })
+            .With(new SkiaOptions
+            {
+                MaxGpuResourceSizeBytes = 1024L * 1024 * 1024,
+            });
 #if DEBUG
         builder = builder.WithDeveloperTools();
 #endif

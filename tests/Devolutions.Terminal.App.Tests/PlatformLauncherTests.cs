@@ -215,7 +215,8 @@ public sealed class PlatformLauncherTests
         Assert.Contains("Install xdg-utils", openError.Message);
         Assert.Contains("install notify-send", notification.Diagnostic, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Open URI/file/directory: unavailable", report);
-        Assert.Contains("Global summon/desktop shortcut portal: unsupported", report);
+        Assert.Contains("Global summon/quake hotkey", report);
+        Assert.Contains("dt -w", report);
     }
 
     [Fact]

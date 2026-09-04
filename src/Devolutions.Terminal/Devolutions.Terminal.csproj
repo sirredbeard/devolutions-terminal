@@ -15,6 +15,9 @@
     <AssemblyName>Devolutions.Terminal</AssemblyName>
     <Product>Devolutions Terminal</Product>
     <Description>NativeAOT Avalonia terminal emulator.</Description>
+    <!-- GTK shell is Linux-only and optional until Phase 1 is the daily driver. -->
+    <EnableGtkShell Condition="'$(EnableGtkShell)' == '' and ($([MSBuild]::IsOSPlatform('Linux')) or $(RuntimeIdentifier.StartsWith('linux')))">true</EnableGtkShell>
+    <DefineConstants Condition="'$(EnableGtkShell)' == 'true'">$(DefineConstants);ENABLE_GTK_SHELL</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -49,6 +52,9 @@
     <ProjectReference Include="..\Devolutions.Terminal.App\Devolutions.Terminal.App.csproj" />
     <ProjectReference Include="..\Devolutions.Terminal.Broker\Devolutions.Terminal.Broker.csproj" />
     <ProjectReference Include="..\Devolutions.Terminal.Cli\Devolutions.Terminal.Cli.csproj" />
+    <ProjectReference Include="..\Devolutions.Terminal.Shell.Abstractions\Devolutions.Terminal.Shell.Abstractions.csproj" />
+    <ProjectReference Include="..\Devolutions.Terminal.Shell.Gtk\Devolutions.Terminal.Shell.Gtk.csproj"
+                      Condition="'$(EnableGtkShell)' == 'true'" />
   </ItemGroup>
 
   <ItemGroup>

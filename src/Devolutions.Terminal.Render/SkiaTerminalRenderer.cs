@@ -125,7 +125,17 @@ public sealed class SkiaTerminalRenderer : ITerminalRenderer, IDisposable
             }
 
             _paint.Style = SKPaintStyle.Fill;
-            _paint.Color = ToColor(frame.Background);
+            var background = ToColor(frame.Background);
+            if (_settings.BackgroundOpacity < 1f)
+            {
+                canvas.Clear(SKColors.Transparent);
+                background = background.WithAlpha((byte)Math.Clamp(
+                    _settings.BackgroundOpacity * 255f,
+                    0,
+                    255));
+            }
+
+            _paint.Color = background;
             canvas.DrawRect(bounds, _paint);
             DrawImages(canvas, frame, bounds, padding);
 

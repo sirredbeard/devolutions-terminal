@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Devolutions.Terminal.Shell.Abstractions\Devolutions.Terminal.Shell.Abstractions.csproj" />
+  </ItemGroup>
+</Project>

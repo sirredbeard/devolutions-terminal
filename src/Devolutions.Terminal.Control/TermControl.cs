@@ -1712,16 +1712,10 @@ public sealed class TermControl : Avalonia.Controls.Control
         bool shaderEffectsEnabled = true) =>
         new()
         {
-            FontFamily = profile.FontFace,
+            FontFamily = ThemePlatformAdapter.ResolveProfileFontFace(profile.FontFace, OperatingSystem.IsLinux()),
             FontSize = (float)fontSize,
             FontWeight = profile.FontWeight,
-            FallbackFontFamilies =
-            [
-                "Cascadia Mono",
-                "Consolas",
-                "Noto Color Emoji",
-                "Segoe UI Emoji",
-            ],
+            FallbackFontFamilies = ThemePlatformAdapter.ResolveFallbackFonts(OperatingSystem.IsLinux()),
             Effect = profile.RetroTerminalEffect && shaderEffectsEnabled
                 ? TerminalRenderEffect.RetroScanlines
                 : TerminalRenderEffect.None,

@@ -391,9 +391,10 @@ public sealed class LinuxDesktopIntegration(
         report.AppendLine(
             "Tray icon: desktop/backend dependent; freedesktop has no reliable capability probe");
         report.AppendLine(
-            "Global summon/desktop shortcut portal: unsupported " +
-            "(no reflection-free interactive GlobalShortcuts portal session provider is bundled; " +
-            "configure a desktop shortcut to invoke 'wt -w <name>' or use broker/manual summon)");
+            "Global summon/quake hotkey: portal session not bundled. " +
+            "Supported setup: GNOME Settings → Keyboard → View and Customize Shortcuts → " +
+            "Custom Shortcuts → command `dt -w _quake` or `dt -w main`. " +
+            "Broker summon and the command palette remain available without a global key.");
         report.AppendLine(
             "Virtual desktop movement: compositor-specific and unsupported; summon continues in place with a diagnostic");
         foreach (var diagnostic in Capabilities.Diagnostics)

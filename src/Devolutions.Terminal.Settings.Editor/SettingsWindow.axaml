@@ -6,24 +6,26 @@
         x:DataType="vm:SettingsEditorViewModel"
         x:CompileBindings="True"
         Title="Settings"
-        Width="1400"
-        Height="800"
-        MinWidth="960"
-        MinHeight="600"
-        FontFamily="Segoe UI Variable Text, Segoe UI"
+        Width="1100"
+        Height="720"
+        MinWidth="840"
+        MinHeight="560"
+        FontFamily="Adwaita Sans, Cantarell, Inter, Noto Sans, Segoe UI Variable Text, Segoe UI, Sans"
+        FontSize="14"
         Classes="settings-window"
         TransparencyLevelHint="None">
   <Window.Styles>
     <StyleInclude Source="avares://Devolutions.Terminal.Settings.Editor/SettingsTheme.axaml" />
     <Style Selector="TextBlock.pageTitle">
-      <Setter Property="FontSize" Value="20" />
+      <Setter Property="FontSize" Value="22" />
       <Setter Property="FontWeight" Value="SemiBold" />
-      <Setter Property="Margin" Value="0,0,0,4" />
+      <Setter Property="Margin" Value="0,0,0,6" />
     </Style>
     <Style Selector="TextBlock.pageDescription">
       <Setter Property="Opacity" Value="0.72" />
       <Setter Property="TextWrapping" Value="Wrap" />
-      <Setter Property="Margin" Value="0,0,0,20" />
+      <Setter Property="FontWeight" Value="Normal" />
+      <Setter Property="Margin" Value="0,0,0,18" />
     </Style>
     <Style Selector="TextBlock.fieldLabel">
       <Setter Property="VerticalAlignment" Value="Center" />
@@ -31,12 +33,14 @@
       <Setter Property="Margin" Value="0,6,16,6" />
     </Style>
     <Style Selector="TextBox.field">
-      <Setter Property="Margin" Value="0,4" />
+      <Setter Property="Margin" Value="0,3" />
       <Setter Property="MinWidth" Value="200" />
+      <Setter Property="CornerRadius" Value="8" />
     </Style>
     <Style Selector="ComboBox.field">
-      <Setter Property="Margin" Value="0,4" />
+      <Setter Property="Margin" Value="0,3" />
       <Setter Property="MinWidth" Value="200" />
+      <Setter Property="CornerRadius" Value="8" />
     </Style>
     <Style Selector="CheckBox.field">
       <Setter Property="Margin" Value="0,6" />
@@ -581,7 +585,7 @@
   </Window.DataTemplates>
 
   <DockPanel>
-    <Border DockPanel.Dock="Bottom" Classes="settings-footer" Padding="16,10">
+    <Border DockPanel.Dock="Bottom" Classes="settings-footer" Padding="12,8">
       <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto" ColumnSpacing="8">
         <Button Classes="settings-secondary" Content="Open JSON file" Command="{Binding OpenJsonCommand}" />
         <Button Grid.Column="1" Classes="settings-secondary" Content="Reset defaults" Command="{Binding ResetCommand}" />
@@ -614,20 +618,13 @@
       </Grid>
     </Border>
 
-    <Grid ColumnDefinitions="320,*">
-      <Border Grid.Column="0" Classes="settings-navigation" Padding="4,0">
+    <Grid ColumnDefinitions="280,*">
+      <Border Grid.Column="0" Classes="settings-navigation" Padding="6,0">
         <DockPanel>
           <StackPanel DockPanel.Dock="Top">
-            <ToggleButton Name="NavigationMenuButton"
-                          Classes="navigationMenu"
-                          AutomationProperties.Name="Search settings"
-                          IsChecked="{Binding IsSearchOpen}">
-              <TextBlock Text="?"
-                         FontFamily="Cascadia Mono"
-                         FontSize="16" />
-            </ToggleButton>
-            <TextBox Margin="8,0,8,8"
-                     IsVisible="{Binding IsSearchOpen}"
+            <TextBox Margin="10,10,10,8"
+                     MinHeight="36"
+                     CornerRadius="8"
                      PlaceholderText="Search settings"
                      Text="{Binding SearchText}" />
           </StackPanel>
@@ -636,7 +633,7 @@
                    SelectedItem="{Binding SelectedNavigationItem}">
             <ListBox.ItemTemplate>
               <DataTemplate x:DataType="vm:SettingsNavigationItem">
-                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="32,*" ColumnSpacing="8">
+                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*" ColumnSpacing="8">
                   <TextBlock Grid.ColumnSpan="2"
                              Margin="11,12,0,6"
                              FontSize="13"
@@ -647,6 +644,8 @@
                              Grid.Row="1"
                              FontFamily="{Binding IconFontFamily}"
                              FontSize="16"
+                             Width="20"
+                             IsVisible="{Binding HasIcon}"
                              HorizontalAlignment="Center"
                              VerticalAlignment="Center" />
                   <TextBlock Grid.Row="1"
@@ -661,7 +660,7 @@
       </Border>
 
       <DockPanel Grid.Column="1">
-        <ScrollViewer Padding="48,12,48,24" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer Padding="32,20,40,28" HorizontalScrollBarVisibility="Disabled">
           <ContentControl Content="{Binding CurrentPage}" />
         </ScrollViewer>
       </DockPanel>

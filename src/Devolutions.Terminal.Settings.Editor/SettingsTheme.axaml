@@ -15,15 +15,15 @@
           <SolidColorBrush x:Key="SettingsFooterBackground" Color="#CCF9F9F9" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
-          <SolidColorBrush x:Key="SettingsPageBackground" Color="#272727" />
-          <SolidColorBrush x:Key="SettingsNavigationBackground" Color="#282828" />
-          <SolidColorBrush x:Key="SettingsCardBackground" Color="#333333" />
-          <SolidColorBrush x:Key="SettingsCardHoverBackground" Color="#3A3A3A" />
-          <SolidColorBrush x:Key="SettingsCardBorderBrush" Color="#3D3D3D" />
-          <SolidColorBrush x:Key="SettingsSubtleFill" Color="#0FFFFFFF" />
-          <SolidColorBrush x:Key="SettingsControlFill" Color="#3A3A3A" />
-          <SolidColorBrush x:Key="SettingsTextSecondary" Color="#C8FFFFFF" />
-          <SolidColorBrush x:Key="SettingsFooterBackground" Color="#252525" />
+          <SolidColorBrush x:Key="SettingsPageBackground" Color="#242424" />
+          <SolidColorBrush x:Key="SettingsNavigationBackground" Color="#202020" />
+          <SolidColorBrush x:Key="SettingsCardBackground" Color="#303030" />
+          <SolidColorBrush x:Key="SettingsCardHoverBackground" Color="#383838" />
+          <SolidColorBrush x:Key="SettingsCardBorderBrush" Color="#1FFFFFFF" />
+          <SolidColorBrush x:Key="SettingsSubtleFill" Color="#14FFFFFF" />
+          <SolidColorBrush x:Key="SettingsControlFill" Color="#353535" />
+          <SolidColorBrush x:Key="SettingsTextSecondary" Color="#A8FFFFFF" />
+          <SolidColorBrush x:Key="SettingsFooterBackground" Color="#202020" />
         </ResourceDictionary>
       </ResourceDictionary.ThemeDictionaries>
     </ResourceDictionary>
@@ -44,11 +44,12 @@
   </Style>
 
   <Style Selector="ListBox.settings-navigation-list ListBoxItem">
-    <Setter Property="Margin" Value="0,2" />
-    <Setter Property="Padding" Value="12,9" />
-    <Setter Property="MinHeight" Value="40" />
-    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="Margin" Value="0,1" />
+    <Setter Property="Padding" Value="12,8" />
+    <Setter Property="MinHeight" Value="38" />
+    <Setter Property="CornerRadius" Value="8" />
     <Setter Property="Background" Value="Transparent" />
+    <Setter Property="FontWeight" Value="Normal" />
     <Setter Property="Template">
       <ControlTemplate>
         <Grid>
@@ -95,17 +96,17 @@
     <Setter Property="Background" Value="{DynamicResource SettingsCardBackground}" />
     <Setter Property="BorderBrush" Value="{DynamicResource SettingsCardBorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="4" />
-    <Setter Property="Padding" Value="16,10" />
-    <Setter Property="Margin" Value="0,0,0,6" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="Padding" Value="16,12" />
+    <Setter Property="Margin" Value="0,0,0,8" />
   </Style>
 
   <Style Selector="Border.settings-row">
     <Setter Property="Background" Value="{DynamicResource SettingsCardBackground}" />
     <Setter Property="BorderBrush" Value="{DynamicResource SettingsCardBorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="4" />
-    <Setter Property="Margin" Value="0,0,0,5" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="Margin" Value="0,0,0,8" />
   </Style>
 
   <Style Selector="Border.settings-row:pointerover">
@@ -132,7 +133,7 @@
   </Style>
 
   <Style Selector="TextBlock.pageTitle">
-    <Setter Property="FontSize" Value="20" />
+    <Setter Property="FontSize" Value="22" />
     <Setter Property="FontWeight" Value="SemiBold" />
   </Style>
 
@@ -148,19 +149,25 @@
   </Style>
 
   <Style Selector="TextBox.field">
-    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="MinHeight" Value="36" />
     <Setter Property="MinWidth" Value="248" />
     <Setter Property="MaxWidth" Value="248" />
     <Setter Property="HorizontalAlignment" Value="Stretch" />
     <Setter Property="Background" Value="{DynamicResource SettingsControlFill}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource SettingsCardBorderBrush}" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="FontWeight" Value="Normal" />
   </Style>
 
   <Style Selector="ComboBox.field">
-    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="MinHeight" Value="36" />
     <Setter Property="MinWidth" Value="248" />
     <Setter Property="MaxWidth" Value="248" />
     <Setter Property="HorizontalAlignment" Value="Stretch" />
     <Setter Property="Background" Value="{DynamicResource SettingsControlFill}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource SettingsCardBorderBrush}" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="FontWeight" Value="Normal" />
   </Style>
 
   <Style Selector="CheckBox.field">
@@ -169,7 +176,8 @@
     <Setter Property="Background" Value="{DynamicResource SettingsCardBackground}" />
     <Setter Property="BorderBrush" Value="{DynamicResource SettingsCardBorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="FontWeight" Value="Normal" />
   </Style>
 
   <Style Selector="CheckBox.field:pointerover">
@@ -184,7 +192,9 @@
   </Style>
 
   <Style Selector="Button.settings-secondary">
-    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="MinHeight" Value="34" />
     <Setter Property="Padding" Value="14,6" />
+    <Setter Property="CornerRadius" Value="7" />
+    <Setter Property="FontWeight" Value="Normal" />
   </Style>
 </Styles>

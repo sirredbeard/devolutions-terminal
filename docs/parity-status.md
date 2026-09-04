@@ -1,5 +1,7 @@
 # Post-port parity status
 
+Product direction for Linux (WT-familiar behavior, GNOME-native presentation) lives in [linux-parity-roadmap.md](linux-parity-roadmap.md).
+
 This document is the authoritative measured parity record for the .NET 10,
 NativeAOT, and Avalonia port. [history/porting.md](history/porting.md) records the historical roadmap;
 this file records measured behavior after the Windows, Ghostty, and Linux
@@ -56,7 +58,7 @@ diagnostic because they are not the same persistence contract.
 | Open URI/file | Registered shell with argument-safe process launch | Portal preferred, `xdg-open` fallback, bounded execution, explicit errors | Complete for supported providers |
 | Open current directory | Registered shell | Same portal/fallback service with directory validation | Complete for supported providers |
 | Tray | Implemented | Implemented where the Avalonia desktop backend supports it | Capability report records that freedesktop has no reliable tray probe |
-| Global summon/quake | Collision-safe `RegisterHotKey`, broker routing, mouse/current monitor placement, bounded dropdown, settings re-registration | Broker/manual summon works; cross-desktop global shortcut registration is explicitly unsupported because no reflection-free interactive GlobalShortcuts portal session provider is bundled | Windows and Linux quake/summon placement and visibility were verified live; virtual-desktop movement remains best-effort |
+| Global summon/quake | Collision-safe `RegisterHotKey`, broker routing, mouse/current monitor placement, bounded dropdown, settings re-registration | Broker/manual summon works; global shortcut portal session is not bundled. Supported setup is a GNOME Settings custom shortcut to `dt -w` (see diagnose-desktop and linux-parity-roadmap) | Windows and Linux quake/summon placement and visibility were verified live; virtual-desktop movement remains best-effort |
 | Default terminal | Versioned native boundary; explicitly unavailable because OpenConsole handoff v3 proxy/stub and host are not bundled | Explicit, reversible `xdg-terminal-exec` preference and Debian alternatives helper | Windows package registration must wait for the real handoff implementation; other Linux distro registries are unsupported |
 | Explorer integration | Packaged x64/ARM64 `IExplorerCommand` server for directory and directory-background verbs | N/A | Clean-machine package interaction remains a protected signing/release gate |
 | Jump lists | Native helper generates visible profile tasks and refreshes after startup/settings saves | N/A | Clean-machine pinned-task verification remains a protected signing/release gate |

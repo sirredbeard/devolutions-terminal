@@ -82,6 +82,11 @@ public sealed class PowerShellCoreProfileGenerator : IDynamicProfileGenerator
                 StartingDirectory = "%USERPROFILE%",
                 Icon = instance.Preview ? PowerShellPreviewIcon : PowerShellIcon,
                 ColorScheme = "Campbell",
+                Font = _environment.IsLinux
+                    ? new FontSettings { Face = ThemePlatformAdapter.LinuxDefaultFontFace, Size = ThemePlatformAdapter.LinuxDefaultFontSize }
+                    : new FontSettings(),
+                Background = _environment.IsLinux ? ThemePlatformAdapter.LinuxDefaultBackground : null,
+                Foreground = _environment.IsLinux ? ThemePlatformAdapter.LinuxDefaultForeground : null,
             });
         }
 

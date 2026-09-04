@@ -100,6 +100,10 @@ public sealed record TerminalRendererSettings
     public int GlyphCacheCapacity { get; init; } = 4096;
     public long DecodedImageCacheByteCapacity { get; init; } = 128L * 1024 * 1024;
     public TerminalRenderEffect Effect { get; init; }
+
+    // 1 is opaque. Below 1, the default terminal background lets the
+    // window acrylic/transparency show through, like Windows Terminal.
+    public float BackgroundOpacity { get; init; } = 1;
 }
 
 public enum TerminalRenderEffect

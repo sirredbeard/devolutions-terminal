@@ -15,6 +15,7 @@ public sealed class SettingsNavigationItem
     public required string Title { get; init; }
     public string GroupHeader { get; init; } = string.Empty;
     public bool HasGroupHeader => !string.IsNullOrEmpty(GroupHeader);
+    public bool HasIcon => !string.IsNullOrEmpty(Icon);
     public required string Keywords { get; init; }
     public required object ViewModel { get; init; }
 
@@ -297,23 +298,7 @@ public sealed class SettingsEditorViewModel : ObservableObject
                 SettingsPage.Compatibility => "\uE713",
                 SettingsPage.Extensions => "\uE71B",
                 _ => "\uE946",
-            } : page switch
-            {
-                SettingsPage.Startup => ">",
-                SettingsPage.Interaction => "<>",
-                SettingsPage.Appearance => "*",
-                SettingsPage.Profiles => "@",
-                SettingsPage.ProfileAppearance => "+",
-                SettingsPage.ProfileTerminal => "_",
-                SettingsPage.ProfileAdvanced => "#",
-                SettingsPage.ColorSchemes => "%",
-                SettingsPage.Actions => "!",
-                SettingsPage.NewTabMenu => "+",
-                SettingsPage.Rendering => "=",
-                SettingsPage.Compatibility => "?",
-                SettingsPage.Extensions => "...",
-                _ => ".",
-            },
+            } : string.Empty,
             Title = title,
             GroupHeader = groupHeader,
             Keywords = keywords,

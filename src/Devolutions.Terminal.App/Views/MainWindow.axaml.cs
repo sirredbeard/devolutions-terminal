@@ -351,38 +351,74 @@ public partial class MainWindow :
 
     private void Menu_OnClick(object? sender, RoutedEventArgs e)
     {
-        var menu = new ContextMenu
-        {
-            ItemsSource = BuildNewTabMenu(),
-        };
-        menu.Open(sender as Control);
+        // Linux hamburger: app menu. Windows/macOS chevron: full WT new-tab menu.
+        var host = WindowChrome.DetectHost();
+        var items = host == WindowChromeHost.Linux
+            ? BuildAppMenu()
+            : BuildNewTabMenu();
+        OpenChromeMenu(sender as Control, items, host);
     }
 
-    private List<MenuItem> BuildNewTabMenu()
+    private void NewTabMenu_OnClick(object? sender, RoutedEventArgs e)
     {
-        var resolvedItems = NewTabMenuResolver.Resolve(_settings);
-        var items = resolvedItems
+        // + opens default profile. Chevron picks another shell on Linux, or the
+        // full WT new-tab menu on Windows/macOS titlebar.
+        var host = WindowChrome.DetectHost();
+        var items = host == WindowChromeHost.Linux
+            ? BuildShellMenu()
+            : BuildNewTabMenu();
+        OpenChromeMenu(sender as Control, items, host);
+    }
+
+    private static void OpenChromeMenu(
+        Control? anchor,
+        IEnumerable<MenuItem> items,
+        WindowChromeHost host)
+    {
+        var menu = new ContextMenu { ItemsSource = items };
+        if (host == WindowChromeHost.Linux)
+        {
+            menu.Background = AdwaitaChrome.PopoverBrush();
+            menu.CornerRadius = new CornerRadius(12);
+            menu.BorderBrush = new SolidColorBrush(Color.Parse("#26FFFFFF"));
+            menu.BorderThickness = new Thickness(1);
+            menu.Padding = new Thickness(6, 8);
+            menu.FontFamily = new FontFamily("Adwaita Sans, Cantarell, Sans");
+            menu.FontSize = 13;
+        }
+
+        menu.Open(anchor);
+    }
+
+    private List<MenuItem> BuildShellMenu()
+    {
+        var items = NewTabMenuResolver.Resolve(_settings)
             .Select(CreateMenuItem)
             .ToList();
         if (items.Count > 0)
         {
             items.Add(new MenuItem { Header = "-" });
         }
+
         var splitPane = new MenuItem
         {
             Header = "Split pane",
             Command = new RelayCommand(() => _ = SplitActivePaneAsync(PaneSplitOrientation.Vertical)),
-            Icon = FluentMenuIcon("\uE7C2"),
+            Icon = FluentMenuIcon("\uE7C2", "▥"),
         };
         AutomationProperties.SetName(splitPane, "Split pane");
         AutomationProperties.SetAutomationId(splitPane, "SplitPaneMenuItem");
         items.Add(splitPane);
-        items.Add(new MenuItem { Header = "-" });
+        return items;
+    }
+
+    private List<MenuItem> BuildAppMenu()
+    {
         var settings = new MenuItem
         {
             Header = "Settings",
             Command = new RelayCommand(() => OpenSettings()),
-            Icon = FluentMenuIcon("\uE713"),
+            Icon = FluentMenuIcon("\uE713", "⚙"),
             InputGesture = EffectiveDefaultGesture(
                 "ctrl+comma",
                 ShortcutAction.OpenSettings,
@@ -390,23 +426,34 @@ public partial class MainWindow :
         };
         AutomationProperties.SetName(settings, "Settings");
         AutomationProperties.SetAutomationId(settings, "SettingsMenuItem");
-        items.Add(settings);
-        items.Add(new MenuItem
-        {
-            Header = "Command palette",
-            Command = new RelayCommand(() => ShowCommandPalette()),
-            Icon = FluentMenuIcon("\uE945"),
-            InputGesture = EffectiveDefaultGesture(
-                "ctrl+shift+p",
-                ShortcutAction.ToggleCommandPalette,
-                new KeyGesture(Key.P, KeyModifiers.Control | KeyModifiers.Shift)),
-        });
-        items.Add(new MenuItem
-        {
-            Header = "About",
-            Command = new RelayCommand(ShowAbout),
-            Icon = FluentMenuIcon("\uE897"),
-        });
+        return
+        [
+            settings,
+            new MenuItem
+            {
+                Header = "Command palette",
+                Command = new RelayCommand(() => ShowCommandPalette()),
+                Icon = FluentMenuIcon("\uE945", "⌘"),
+                InputGesture = EffectiveDefaultGesture(
+                    "ctrl+shift+p",
+                    ShortcutAction.ToggleCommandPalette,
+                    new KeyGesture(Key.P, KeyModifiers.Control | KeyModifiers.Shift)),
+            },
+            new MenuItem
+            {
+                Header = "About",
+                Command = new RelayCommand(ShowAbout),
+                Icon = FluentMenuIcon("\uE897", "ℹ"),
+            },
+        ];
+    }
+
+    private List<MenuItem> BuildNewTabMenu()
+    {
+        // Windows/macOS titlebar dropdown: shells + app actions together (WT shape).
+        var items = BuildShellMenu();
+        items.Add(new MenuItem { Header = "-" });
+        items.AddRange(BuildAppMenu());
         return items;
     }
 
@@ -443,15 +490,31 @@ public partial class MainWindow :
         return null;
     }
 
-    private static TextBlock FluentMenuIcon(string glyph) =>
-        new()
+    private static Control FluentMenuIcon(string glyph, string? linuxFallback = null)
+    {
+        // Segoe Fluent Icons is a Windows font. On Linux/macOS use a short
+        // text fallback so the menu is not a row of empty boxes.
+        if (OperatingSystem.IsWindows())
         {
-            Text = glyph,
-            FontFamily = new FontFamily("Segoe Fluent Icons"),
-            FontSize = 16,
+            return new TextBlock
+            {
+                Text = glyph,
+                FontFamily = new FontFamily("Segoe Fluent Icons"),
+                FontSize = 16,
+                Width = 20,
+                TextAlignment = TextAlignment.Center,
+            };
+        }
+
+        return new TextBlock
+        {
+            Text = linuxFallback ?? "•",
+            FontSize = 14,
             Width = 20,
             TextAlignment = TextAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
         };
+    }
 
     private MenuItem CreateMenuItem(ResolvedNewTabMenuItem item)
     {
@@ -958,6 +1021,15 @@ public partial class MainWindow :
                 ContextMenu = CreateTabContextMenu(tab),
                 Width = tabWidth,
             };
+            if (OperatingSystem.IsLinux())
+            {
+                button.Classes.Add("linux");
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                button.Classes.Add("macos");
+            }
+
             Avalonia.Controls.Chrome.WindowDecorationProperties.SetElementRole(
                 button,
                 Avalonia.Input.WindowDecorationsElementRole.User);
@@ -1877,17 +1949,20 @@ public partial class MainWindow :
         });
         Register(ShortcutAction.ToggleFullscreen, ActionScope.Window, _ => true, _ =>
         {
-            WindowState = WindowState == WindowState.FullScreen ? WindowState.Normal : WindowState.FullScreen;
+            WindowState = WindowStateTransitions.ToggleFullscreen(WindowState);
+            UpdateFullscreenChrome();
             return Task.CompletedTask;
         });
         Register(ShortcutAction.SetFullScreen, ActionScope.Window, action => action.Args is SetFullScreenArgs, action =>
         {
-            WindowState = ((SetFullScreenArgs)action.Args!).IsFullScreen ? WindowState.FullScreen : WindowState.Normal;
+            WindowState = WindowStateTransitions.SetFullscreen(((SetFullScreenArgs)action.Args!).IsFullScreen);
+            UpdateFullscreenChrome();
             return Task.CompletedTask;
         });
         Register(ShortcutAction.SetMaximized, ActionScope.Window, action => action.Args is SetMaximizedArgs, action =>
         {
-            WindowState = ((SetMaximizedArgs)action.Args!).IsMaximized ? WindowState.Maximized : WindowState.Normal;
+            WindowState = WindowStateTransitions.SetMaximized(((SetMaximizedArgs)action.Args!).IsMaximized);
+            UpdateFullscreenChrome();
             return Task.CompletedTask;
         });
         Register(ShortcutAction.ToggleAlwaysOnTop, ActionScope.Window, _ => true, _ =>
@@ -2651,31 +2726,44 @@ public partial class MainWindow :
 
     private void TitleBar_OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
         {
-            BeginMoveDrag(e);
+            return;
         }
+
+        // GNOME and WT both toggle maximize on header double-click.
+        if (e.ClickCount == 2 && CanResize)
+        {
+            WindowState = WindowStateTransitions.ToggleMaximized(WindowState);
+            UpdateFullscreenChrome();
+            e.Handled = true;
+            return;
+        }
+
+        BeginMoveDrag(e);
     }
 
-    private void ExitFullscreen_OnClick(object? sender, RoutedEventArgs e) =>
+    private void ExitFullscreen_OnClick(object? sender, RoutedEventArgs e)
+    {
         WindowState = WindowState.Normal;
+        UpdateFullscreenChrome();
+    }
+
+    private void Minimize_OnClick(object? sender, RoutedEventArgs e) =>
+        WindowState = WindowState.Minimized;
+
+    private void MaximizeRestore_OnClick(object? sender, RoutedEventArgs e)
+    {
+        WindowState = WindowStateTransitions.ToggleMaximized(WindowState);
+        UpdateFullscreenChrome();
+    }
+
+    private void Close_OnClick(object? sender, RoutedEventArgs e) => Close();
 
     private void UpdateFullscreenChrome()
     {
-        var isFullscreen = WindowState == WindowState.FullScreen;
-        ExitFullscreenButton.IsVisible = isFullscreen && !Win32ParentWindow.IsRequested;
-        ApplyTitleBarMargin();
         ApplyWindowChrome();
     }
-
-    private void ApplyTitleBarMargin() =>
-        TitleBarLayout.Margin = WindowChrome.TitleBarContentMargin(
-            fullscreen: WindowState == WindowState.FullScreen,
-            macOS: OperatingSystem.IsMacOS(),
-            windows: OperatingSystem.IsWindows(),
-            offScreenMargin: MacOsDecorationMargin(),
-            rightToLeft: FlowDirection == FlowDirection.RightToLeft ||
-                         CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft);
 
     private Thickness MacOsDecorationMargin() =>
         new(
@@ -2686,31 +2774,213 @@ public partial class MainWindow :
 
     private void ApplyWindowChrome()
     {
-        var embedded = OperatingSystem.IsWindows() && Win32ParentWindow.IsRequested;
-        var fullscreen = WindowState == WindowState.FullScreen;
-        var showTabs = !_focusMode &&
-                       WindowChrome.ShouldShowTabRow(_settings, _tabs.Count, fullscreen);
-        TabScrollViewer.IsVisible = showTabs;
-        NewTabButton.IsVisible = showTabs;
-        MenuButton.IsVisible = showTabs;
-        ApplyTitleBarMargin();
+        var host = WindowChrome.DetectHost();
+        var embedded = host == WindowChromeHost.Windows && Win32ParentWindow.IsRequested;
+        var rightToLeft = FlowDirection == FlowDirection.RightToLeft ||
+                          CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft;
+        var layout = WindowChrome.Resolve(
+            _settings,
+            host,
+            _tabs.Count,
+            WindowState,
+            _focusMode,
+            embedded,
+            MacOsDecorationMargin(),
+            rightToLeft);
+
+        TitleBar.IsVisible = layout.ShowTitleBar;
+        TitleBar.Height = layout.TitleBarHeight;
+        TitleBar.BorderThickness = default;
+        TitleBar.BorderBrush = null;
+        TitleBarLayout.Margin = layout.TitleBarMargin;
+        TitleBarLayout.ColumnDefinitions = new ColumnDefinitions("Auto,Auto,*,Auto,Auto");
+
+        // Place the tab scroller under the GNOME header or inside the WT titlebar.
+        EnsureTabStripHost(layout.TabsBelowHeader && layout.ShowTabStrip);
+        TabRow.IsVisible = layout.TabsBelowHeader && layout.ShowTabStrip;
+        TabRow.Height = layout.TabsBelowHeader ? WindowChrome.LinuxTabRowHeight : 0;
+
+        if (host == WindowChromeHost.Linux)
+        {
+            ApplyAdwaitaMaterials(layout);
+        }
+        else
+        {
+            TitleBar.Background = new SolidColorBrush(Color.Parse("#202020"));
+            TitleBar.BoxShadow = default;
+            TabRow.BoxShadow = default;
+            TitleBarTopRim.IsVisible = false;
+        }
+
+        TabScrollViewer.IsVisible = layout.ShowTabStrip;
+        TabScrollViewer.HorizontalAlignment = HorizontalAlignment.Left;
+        TabScrollViewer.MaxWidth = layout.TabsBelowHeader ? 4096 : 720;
+
+        NewTabCluster.HorizontalAlignment = HorizontalAlignment.Left;
+        NewTabCluster.Height = double.NaN;
+        NewTabButton.IsVisible = layout.ShowNewTabButton;
+        NewTabMenuButton.IsVisible = layout.ShowNewTabMenuButton;
+        NewTabSplit.IsVisible = layout.ShowNewTabButton || layout.ShowNewTabMenuButton;
+        // Linux uses the pill split. Windows/macOS keep flat icon buttons in the titlebar.
+        NewTabButton.Classes.Set("header-split-main", host == WindowChromeHost.Linux);
+        NewTabButton.Classes.Set("icon", host != WindowChromeHost.Linux);
+        NewTabMenuButton.Classes.Set("header-split-menu", host == WindowChromeHost.Linux);
+        NewTabMenuButton.Classes.Set("icon", host != WindowChromeHost.Linux);
+        NewTabSplit.Classes.Set("header-split", host == WindowChromeHost.Linux);
+
+        // Linux: hamburger at header end (app menu). Windows/macOS: full menu on titlebar chevron.
+        PlaceMenuButton(layout);
+        MenuButton.IsVisible = layout.ShowMenuButton;
+        ExitFullscreenButton.IsVisible = layout.ShowExitFullscreenButton && !embedded;
+
+        WindowTitleText.IsVisible = layout.ShowWindowTitle;
+        HeaderFindButton.IsVisible = layout.ShowHeaderFind;
+        HeaderFindButton.Classes.Set("header-action", host == WindowChromeHost.Linux);
+        HeaderFindButton.Classes.Set("icon", host != WindowChromeHost.Linux);
+        CaptionButtons.IsVisible = layout.ShowClientCaptionButtons;
+        // GNOME CSD default: close only. Maximize stays on double-click / Super+Up.
+        MinimizeButton.IsVisible = layout.ShowMinimizeCaption;
+        MaximizeRestoreButton.IsVisible = layout.ShowMaximizeCaption;
+        CloseButton.IsVisible = layout.ShowClientCaptionButtons;
+
+        CanResize = layout.CanResize;
+        ClipToBounds = layout.ClipToBounds;
+        BorderThickness = layout.BorderThickness;
+        CornerRadius = layout.CornerRadius > 0
+            ? new CornerRadius(layout.CornerRadius)
+            : default;
+        if (layout.BorderThickness != default)
+        {
+            // Hairline only. Hard 1px chrome edges read as "drawn UI", not Adwaita.
+            BorderBrush = new SolidColorBrush(Color.Parse("#22FFFFFF"));
+        }
 
         if (embedded)
         {
-            TitleBar.IsVisible = showTabs;
             Win32ParentWindow.ApplyEmbeddedChrome(this);
             Topmost = false;
+            ExtendClientAreaToDecorationsHint = false;
+            WindowDecorations = WindowDecorations.None;
             return;
         }
 
-        var customTitlebar = WindowChrome.ShouldUseCustomTitlebar(_settings, embedded: false);
-        ExtendClientAreaToDecorationsHint = customTitlebar && !_focusMode;
-        TitleBar.IsVisible = !_focusMode && (showTabs || customTitlebar);
-        TitleBarLayout.ColumnDefinitions = new ColumnDefinitions("Auto,Auto,*");
-        TabScrollViewer.HorizontalAlignment = HorizontalAlignment.Left;
-        NewTabCluster.HorizontalAlignment = HorizontalAlignment.Left;
-        TitleBar.Height = 40;
-        NewTabCluster.Height = double.NaN;
+        ExtendClientAreaToDecorationsHint = layout.ExtendClientAreaToDecorations;
+        ExtendClientAreaTitleBarHeightHint = layout.ExtendClientAreaToDecorations
+            ? layout.TitleBarHeight
+            : 0;
+        WindowDecorations = layout.WindowDecorations;
+        UpdateMaximizeRestoreGlyph();
+    }
+
+    private void ApplyAdwaitaMaterials(WindowChromeLayout layout)
+    {
+        // Real libadwaita dark materials. Flat #303030 without shade/rim is the
+        // uncanny-valley mockup look. Gradient, top rim, bottom shade, drop.
+        TitleBar.Background = AdwaitaChrome.HeaderBackgroundBrush();
+        TitleBarTopRim.IsVisible = true;
+        TitleBarTopRim.Background = new SolidColorBrush(Color.Parse(AdwaitaChrome.TopRim));
+
+        TabRow.Background = AdwaitaChrome.SolidHeaderBrush();
+        TabRow.BorderThickness = default;
+        TabRow.BorderBrush = null;
+
+        // Shade sits on the bottom edge of the chrome stack so it falls onto the view.
+        var tabsShowing = layout.TabsBelowHeader && layout.ShowTabStrip;
+        TitleBar.BoxShadow = tabsShowing ? default : AdwaitaChrome.ChromeStackShade();
+        TabRow.BoxShadow = tabsShowing ? AdwaitaChrome.ChromeStackShade() : default;
+
+        WindowTitleText.FontFamily = new FontFamily("Adwaita Sans, Cantarell, Sans");
+        WindowTitleText.FontSize = 13;
+        WindowTitleText.FontWeight = FontWeight.Bold;
+        WindowTitleText.Foreground = new SolidColorBrush(Color.Parse(AdwaitaChrome.HeaderFg));
+        WindowTitleText.Opacity = AdwaitaChrome.TitleOpacity;
+
+        // No Mica/acrylic on Linux. Adwaita is solid paint + shade.
+        TransparencyLevelHint = [WindowTransparencyLevel.None];
+        Background = AdwaitaChrome.WindowBrush();
+        TerminalHost.Background = AdwaitaChrome.ViewBrush();
+
+        // Outer CSD rim. Mutter draws the real shadow; we keep a hairline only.
+        BorderThickness = new Thickness(1);
+        BorderBrush = new SolidColorBrush(Color.Parse("#1AFFFFFF"));
+    }
+
+    private void EnsureTabStripHost(bool belowHeader)
+    {
+        var target = belowHeader ? TabRowTabsHost : TitleBarTabsHost;
+        if (ReferenceEquals(TabScrollViewer.Parent, target))
+        {
+            return;
+        }
+
+        if (TabScrollViewer.Parent is Panel current)
+        {
+            current.Children.Remove(TabScrollViewer);
+        }
+
+        target.Children.Add(TabScrollViewer);
+    }
+
+    private void PlaceMenuButton(WindowChromeLayout layout)
+    {
+        // Linux header end: circular hamburger. Titlebar cluster: chevron.
+        if (layout.TabsBelowHeader)
+        {
+            if (!ReferenceEquals(MenuButton.Parent, HeaderEndActions))
+            {
+                (MenuButton.Parent as Panel)?.Children.Remove(MenuButton);
+                HeaderEndActions.Children.Add(MenuButton);
+            }
+
+            // Soft pill, not a hard icon square.
+            MenuButton.Classes.Set("icon", false);
+            MenuButton.Classes.Set("header-action", true);
+            MenuButtonGlyph.Data = Geometry.Parse(
+                "M 0,2 L 12,2 M 0,6 L 12,6 M 0,10 L 12,10");
+            MenuButtonGlyph.Width = 12;
+            MenuButtonGlyph.Height = 10;
+            ToolTip.SetTip(MenuButton, "Menu");
+            AutomationProperties.SetName(MenuButton, "Menu");
+        }
+        else
+        {
+            if (!ReferenceEquals(MenuButton.Parent, NewTabCluster))
+            {
+                (MenuButton.Parent as Panel)?.Children.Remove(MenuButton);
+                // Keep exit-fullscreen last when present.
+                var insertAt = NewTabCluster.Children.IndexOf(ExitFullscreenButton);
+                if (insertAt < 0)
+                {
+                    NewTabCluster.Children.Add(MenuButton);
+                }
+                else
+                {
+                    NewTabCluster.Children.Insert(insertAt, MenuButton);
+                }
+            }
+
+            // Hidden on Windows/macOS (ShowMenuButton false). Keep chevron glyph
+            // if a host ever re-enables the cluster menu.
+            MenuButton.Classes.Set("icon", true);
+            MenuButton.Classes.Set("header-action", false);
+            MenuButtonGlyph.Data = Geometry.Parse("M 0,1 L 4,5 L 8,1");
+            MenuButtonGlyph.Width = 8;
+            MenuButtonGlyph.Height = 5;
+            ToolTip.SetTip(MenuButton, "New tab menu");
+            AutomationProperties.SetName(MenuButton, "New tab menu");
+        }
+    }
+
+    private void HeaderFind_OnClick(object? sender, RoutedEventArgs e) => ShowFind();
+
+    private void UpdateMaximizeRestoreGlyph()
+    {
+        var isMaximized = WindowState == WindowState.Maximized;
+        MaximizeRestoreGlyph.Data = isMaximized
+            ? Geometry.Parse("M 2,0 L 10,0 L 10,8 M 0,2 L 8,2 L 8,10 L 0,10 Z")
+            : Geometry.Parse("M 0,0 L 10,0 L 10,10 L 0,10 Z");
+        ToolTip.SetTip(MaximizeRestoreButton, isMaximized ? "Restore" : "Maximize");
+        AutomationProperties.SetName(MaximizeRestoreButton, isMaximized ? "Restore" : "Maximize");
     }
 
     private async Task SummonAsync(GlobalSummonArgs args, bool quake)
@@ -2882,13 +3152,18 @@ public partial class MainWindow :
     {
         Dispatcher.UIThread.Post(CaptureNormalWindowBounds, DispatcherPriority.Background);
 
+        var host = WindowChrome.DetectHost();
+        var rightToLeft = FlowDirection == FlowDirection.RightToLeft ||
+                          CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft;
         var reserved = WindowChrome.TabStripTrailingReserve(
-            OperatingSystem.IsMacOS(),
-            OperatingSystem.IsWindows(),
-            WindowChrome.MacOsWindowControlsOnRight(
-                MacOsDecorationMargin(),
-                FlowDirection == FlowDirection.RightToLeft ||
-                CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft));
+            macOS: host == WindowChromeHost.MacOS,
+            windows: host == WindowChromeHost.Windows,
+            macOsControlsOnRight: host == WindowChromeHost.MacOS &&
+                WindowChrome.MacOsWindowControlsOnRight(MacOsDecorationMargin(), rightToLeft),
+            linux: host == WindowChromeHost.Linux,
+            clientCaptions: host == WindowChromeHost.Linux &&
+                WindowState != WindowState.FullScreen &&
+                !_focusMode);
         TabScrollViewer.MaxWidth = Math.Max(120, e.NewSize.Width - reserved);
         RebuildTabs();
     }
@@ -4139,27 +4414,37 @@ internal static class ProfileVisualDefaults
             return icon;
         }
 
-        if (profile.Commandline.Contains("pwsh.exe", StringComparison.OrdinalIgnoreCase))
+        var command = profile.Commandline;
+        if (command.Contains("pwsh", StringComparison.OrdinalIgnoreCase))
         {
             return "ms-appx:///ProfileIcons/pwsh.png";
         }
 
-        if (profile.Commandline.Contains("powershell.exe", StringComparison.OrdinalIgnoreCase))
+        if (command.Contains("powershell", StringComparison.OrdinalIgnoreCase))
         {
             return "ms-appx:///ProfileIcons/{61c54bbd-c2c6-5271-96e7-009a87ff44bf}.png";
         }
 
-        if (profile.Commandline.Contains("cmd.exe", StringComparison.OrdinalIgnoreCase))
+        if (command.Contains("cmd.exe", StringComparison.OrdinalIgnoreCase))
         {
             return "ms-appx:///ProfileIcons/{0caa0dad-35be-5f56-a8ff-afceeeaa6101}.png";
         }
 
-        if (profile.Commandline.Contains("wsl.exe", StringComparison.OrdinalIgnoreCase))
+        if (command.Contains("wsl.exe", StringComparison.OrdinalIgnoreCase))
         {
             return "ms-appx:///ProfileGeneratorIcons/WSL.png";
         }
 
-        if (profile.Commandline.Contains("ssh", StringComparison.OrdinalIgnoreCase))
+        if (command.Contains("bash", StringComparison.OrdinalIgnoreCase) ||
+            command.Contains("zsh", StringComparison.OrdinalIgnoreCase) ||
+            command.Contains("fish", StringComparison.OrdinalIgnoreCase) ||
+            command.EndsWith("/sh", StringComparison.OrdinalIgnoreCase) ||
+            command.Equals("sh", StringComparison.OrdinalIgnoreCase))
+        {
+            return "ms-appx:///ProfileIcons/terminal.png";
+        }
+
+        if (command.Contains("ssh", StringComparison.OrdinalIgnoreCase))
         {
             return "ms-appx:///ProfileGeneratorIcons/SSH.png";
         }

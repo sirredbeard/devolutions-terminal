@@ -19,24 +19,53 @@
   </TrayIcon.Icons>
   <Application.Styles>
     <FluentTheme />
+    <Style Selector="Window">
+      <Setter Property="FontFamily" Value="Adwaita Sans, Cantarell, Inter, Noto Sans, Segoe UI Variable Text, Segoe UI, Sans" />
+      <Setter Property="FontSize" Value="14" />
+    </Style>
     <Style Selector="Button.tab">
       <Setter Property="Background" Value="Transparent" />
-      <Setter Property="Foreground" Value="#F2F2F2" />
-      <Setter Property="Padding" Value="10,0" />
-      <Setter Property="Margin" Value="0,4,2,0" />
-      <Setter Property="Height" Value="36" />
+      <Setter Property="Foreground" Value="#F3F3F3" />
+      <Setter Property="Padding" Value="12,0" />
+      <Setter Property="Margin" Value="0" />
+      <Setter Property="Height" Value="40" />
       <Setter Property="MinWidth" Value="120" />
-      <Setter Property="MaxWidth" Value="240" />
-      <Setter Property="CornerRadius" Value="7,7,0,0" />
-      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="MaxWidth" Value="400" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="FontWeight" Value="Normal" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0,0,0,3" />
       <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     </Style>
     <Style Selector="Button.tab:pointerover">
-      <Setter Property="Background" Value="#333333" />
+      <Setter Property="Background" Value="#303030" />
     </Style>
     <Style Selector="Button.tab.active">
-      <Setter Property="Background" Value="#0C0C0C" />
+      <Setter Property="Background" Value="#2E2E2E" />
       <Setter Property="Foreground" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#3584E4" />
+    </Style>
+    <!-- GNOME tab row: same surface as header, soft active chip, no underline. -->
+    <Style Selector="Button.tab.linux">
+      <Setter Property="Margin" Value="2,3" />
+      <Setter Property="Height" Value="30" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontWeight" Value="Normal" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Padding" Value="12,0" />
+    </Style>
+    <Style Selector="Button.tab.linux:pointerover">
+      <Setter Property="Background" Value="#14FFFFFF" />
+    </Style>
+    <Style Selector="Button.tab.linux.active">
+      <!-- card_bg_color: RGB(255 255 255 / 8%) -->
+      <Setter Property="Background" Value="#14FFFFFF" />
+      <Setter Property="Foreground" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="Transparent" />
     </Style>
     <Style Selector="Button.tab.macos">
       <Setter Property="Margin" Value="4,6,0,6" />
@@ -57,28 +86,136 @@
     <Style Selector="Button.icon">
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="Foreground" Value="#F2F2F2" />
-      <Setter Property="Width" Value="32" />
-      <Setter Property="Height" Value="32" />
+      <Setter Property="Width" Value="36" />
+      <Setter Property="Height" Value="36" />
       <Setter Property="Padding" Value="0" />
       <Setter Property="BorderThickness" Value="0" />
       <Setter Property="HorizontalContentAlignment" Value="Center" />
       <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="CornerRadius" Value="18" />
     </Style>
     <Style Selector="Button.icon:pointerover">
-      <Setter Property="Background" Value="#3A3A3A" />
+      <Setter Property="Background" Value="#1FFFFFFF" />
     </Style>
+    <!-- Adwaita header bar: flat icon buttons. Fill only on hover, no permanent pills. -->
+    <Style Selector="Border.header-split">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="Button.header-split-main">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="#FFFFFF" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Width" Value="36" />
+      <Setter Property="Height" Value="36" />
+    </Style>
+    <Style Selector="Button.header-split-main:pointerover">
+      <Setter Property="Background" Value="#1AFFFFFF" />
+    </Style>
+    <Style Selector="Button.header-split-main:pressed">
+      <Setter Property="Background" Value="#0FFFFFFF" />
+    </Style>
+    <Style Selector="Button.header-split-menu">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="#FFFFFF" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Width" Value="28" />
+      <Setter Property="Height" Value="36" />
+    </Style>
+    <Style Selector="Button.header-split-menu:pointerover">
+      <Setter Property="Background" Value="#1AFFFFFF" />
+    </Style>
+    <Style Selector="Button.header-split-menu:pressed">
+      <Setter Property="Background" Value="#0FFFFFFF" />
+    </Style>
+    <Style Selector="Button.header-action">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="#FFFFFF" />
+      <Setter Property="Width" Value="36" />
+      <Setter Property="Height" Value="36" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="Opacity" Value="0.92" />
+    </Style>
+    <Style Selector="Button.header-action:pointerover">
+      <Setter Property="Background" Value="#1AFFFFFF" />
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="Button.header-action:pressed">
+      <Setter Property="Background" Value="#0FFFFFFF" />
+    </Style>
+    <Style Selector="Button.tab-menu">
+      <Setter Property="Background" Value="#282828" />
+      <Setter Property="Foreground" Value="#F2F2F2" />
+      <Setter Property="Width" Value="52" />
+      <Setter Property="Height" Value="40" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="BorderBrush" Value="#1AFFFFFF" />
+      <Setter Property="BorderThickness" Value="1,0,0,0" />
+      <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="Button.tab-menu:pointerover">
+      <Setter Property="Background" Value="#333333" />
+    </Style>
+    <Style Selector="Button.caption">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="#F2F2F2" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="999" />
+    </Style>
+    <Style Selector="Button.caption:pointerover">
+      <Setter Property="Background" Value="#28FFFFFF" />
+    </Style>
+    <Style Selector="Button.caption.close:pointerover">
+      <Setter Property="Background" Value="#C01C28" />
+    </Style>
+    <!-- libadwaita popover_bg_color #36363a -->
     <Style Selector="ContextMenu">
-      <Setter Property="Background" Value="#FF2C2C2C" />
+      <Setter Property="Background" Value="#36363A" />
       <Setter Property="BorderBrush" Value="#26FFFFFF" />
       <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="Padding" Value="0,4" />
-      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="6,8" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="FontFamily" Value="Adwaita Sans, Cantarell, Sans" />
+      <Setter Property="FontSize" Value="13" />
     </Style>
     <Style Selector="MenuItem">
-      <Setter Property="MinHeight" Value="32" />
+      <Setter Property="MinHeight" Value="36" />
       <Setter Property="Margin" Value="4,0" />
-      <Setter Property="Padding" Value="8,4" />
-      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="Padding" Value="10,6" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="FontWeight" Value="Normal" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="MenuItem:pointerover">
+      <Setter Property="Background" Value="#1AFFFFFF" />
+    </Style>
+    <Style Selector="ScrollBar.overlay">
+      <Setter Property="Width" Value="8" />
+      <Setter Property="MinWidth" Value="8" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="AllowAutoHide" Value="True" />
+    </Style>
+    <Style Selector="Button.tab-close">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Width" Value="22" />
+      <Setter Property="Height" Value="22" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="11" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.tab-close:pointerover">
+      <Setter Property="Background" Value="#22FFFFFF" />
     </Style>
   </Application.Styles>
 </Application>

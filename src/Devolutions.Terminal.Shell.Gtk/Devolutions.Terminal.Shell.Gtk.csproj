@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Devolutions.Terminal.Shell.Gtk</RootNamespace>
+    <AssemblyName>Devolutions.Terminal.Shell.Gtk</AssemblyName>
+    <Description>GTK4/libadwaita shell frontend for Devolutions Terminal (Phase 0 chrome spike).</Description>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsAotCompatible>true</IsAotCompatible>
+    <!-- Phase 0: keep Debug easy; Release can AOT when we gate it. -->
+    <PublishAot Condition="'$(Configuration)' == 'Release'">true</PublishAot>
+    <PublishTrimmed Condition="'$(Configuration)' == 'Release'">true</PublishTrimmed>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GirCore.Adw-1" />
+    <PackageReference Include="GirCore.Gtk-4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Devolutions.Terminal.Shell.Abstractions\Devolutions.Terminal.Shell.Abstractions.csproj" />
+  </ItemGroup>
+</Project>

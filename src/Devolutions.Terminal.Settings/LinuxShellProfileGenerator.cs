@@ -72,6 +72,11 @@ public sealed class LinuxShellProfileGenerator(
             Commandline = executable,
             StartingDirectory = environment.UserProfile,
             Icon = Icon,
+            Font = environment.IsLinux
+                ? new FontSettings { Face = ThemePlatformAdapter.LinuxDefaultFontFace, Size = ThemePlatformAdapter.LinuxDefaultFontSize }
+                : new FontSettings(),
+            Background = environment.IsLinux ? ThemePlatformAdapter.LinuxDefaultBackground : null,
+            Foreground = environment.IsLinux ? ThemePlatformAdapter.LinuxDefaultForeground : null,
         };
     }
 }

@@ -12,6 +12,8 @@
     <Project Path="src/Devolutions.Terminal.Interop/Devolutions.Terminal.Interop.csproj" />
     <Project Path="src/Devolutions.Terminal.Package/Devolutions.Terminal.Package.csproj" />
     <Project Path="src/Devolutions.Terminal.Settings.Editor/Devolutions.Terminal.Settings.Editor.csproj" />
+    <Project Path="src/Devolutions.Terminal.Shell.Abstractions/Devolutions.Terminal.Shell.Abstractions.csproj" />
+    <Project Path="src/Devolutions.Terminal.Shell.Gtk/Devolutions.Terminal.Shell.Gtk.csproj" />
     <Project Path="src/Devolutions.Terminal/Devolutions.Terminal.csproj" />
   </Folder>
   <Folder Name="/tests/">
@@ -28,6 +30,7 @@
     <Project Path="tests/Devolutions.Terminal.Settings.Editor.Tests/Devolutions.Terminal.Settings.Editor.Tests.csproj" />
     <Project Path="tests/Devolutions.Terminal.Package.Tests/Devolutions.Terminal.Package.Tests.csproj" />
     <Project Path="tests/Devolutions.Terminal.UI.Tests/Devolutions.Terminal.UI.Tests.csproj" />
+    <Project Path="tests/Devolutions.Terminal.Shell.Abstractions.Tests/Devolutions.Terminal.Shell.Abstractions.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/Devolutions.Terminal.PortInventory/Devolutions.Terminal.PortInventory.csproj" />
